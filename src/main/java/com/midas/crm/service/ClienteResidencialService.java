@@ -15,6 +15,9 @@ import java.util.Optional;
 public interface ClienteResidencialService {
     List<ClienteResidencial> listarTodos();
 
+    // Cambiar para que retorne una lista en lugar de un Optional
+    List<ClienteResidencial> buscarPorMovil(String movil);
+
     ClienteResidencial obtenerPorId(Long id);
 
 
@@ -29,7 +32,7 @@ public interface ClienteResidencialService {
 
 
     // Nuevo método para buscar por móvil
-    Optional<ClienteResidencial> buscarPorMovil(String movilContacto);
+    //Optional<ClienteResidencial> buscarPorMovil(String movilContacto);
 
 
     Page<ClienteConUsuarioDTO> obtenerClientesConUsuarioFiltrados(String dniAsesor, String nombreAsesor, String numeroMovil, LocalDate fecha, Pageable pageable);

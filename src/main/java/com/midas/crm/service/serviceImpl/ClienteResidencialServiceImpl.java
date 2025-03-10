@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class ClienteResidencialServiceImpl implements ClienteResidencialService {
@@ -37,8 +36,9 @@ public class ClienteResidencialServiceImpl implements ClienteResidencialService 
         return clienteRepo.obtenerClientesConUsuario(pageable);
     }
 
+    // Cambiar para que retorne una lista en lugar de un Optional
     @Override
-    public Optional<ClienteResidencial> buscarPorMovil(String movil) {
+    public List<ClienteResidencial> buscarPorMovil(String movil) {
         return clienteRepo.findByMovilContacto(movil);
     }
 

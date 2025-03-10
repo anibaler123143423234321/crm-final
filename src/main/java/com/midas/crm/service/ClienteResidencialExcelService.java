@@ -132,12 +132,13 @@ public class ClienteResidencialExcelService {
      * =========================================================================
      */
     public byte[] generarExcelClienteIndividual(String movilContacto) {
-        Optional<ClienteResidencial> optionalCliente = clienteResidencialRepository.findByMovilContacto(movilContacto);
-        if (optionalCliente.isEmpty()) {
-            return new byte[0]; // si no existe, array vacío
+        List<ClienteResidencial> clientes = clienteResidencialRepository.findByMovilContacto(movilContacto);
+        if (clientes.isEmpty()) {
+            return new byte[0]; // Si no se encontró ningún registro, retornar un array vacío.
         }
 
-        ClienteResidencial cliente = optionalCliente.get();
+        // Ejemplo: usar el primer registro de la lista.
+        ClienteResidencial cliente = clientes.get(0);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Cliente Residencial");
@@ -147,9 +148,7 @@ public class ClienteResidencialExcelService {
 
             int rowNum = 0;
 
-            // ======================================
             // Sección: DATOS CLIENTE RESIDENCIAL
-            // ======================================
             Row headerRow1 = sheet.createRow(rowNum++);
             Cell headerCell1 = headerRow1.createCell(0);
             headerCell1.setCellValue("DATOS CLIENTE RESIDENCIAL");
@@ -167,14 +166,12 @@ public class ClienteResidencialExcelService {
             agregarFila(sheet, rowNum++, "DIRECCIÓN:", cliente.getDireccion());
             agregarFila(sheet, rowNum++, "TIPO DE FIBRA:", cliente.getTipoFibra());
 
-            // Ejemplo de campo no existente en tu entidad (puedes dejarlo vacío o fijo)
+            // Campo de ejemplo para hora de instalación
             agregarFila(sheet, rowNum++, "HORA DE INSTALACIÓN:", "");
 
             rowNum++; // Espacio antes de la siguiente sección
 
-            // ======================================
             // Sección: DATOS DE LA PROMOCIÓN
-            // ======================================
             Row headerRow2 = sheet.createRow(rowNum++);
             Cell headerCell2 = headerRow2.createCell(0);
             headerCell2.setCellValue("DATOS DE LA PROMOCIÓN");
@@ -186,7 +183,7 @@ public class ClienteResidencialExcelService {
             agregarFila(sheet, rowNum++, "MOVIL CONTACTO:", cliente.getMovilContacto());
             agregarFila(sheet, rowNum++, "FIJO / COMPAÑÍA:", cliente.getFijoCompania());
 
-            // MOVILES A PORTAR: como es List<String>, iteramos directamente
+            // Iterar sobre los móviles a portar
             if (cliente.getMovilesAPortar() != null && !cliente.getMovilesAPortar().isEmpty()) {
                 for (int i = 0; i < cliente.getMovilesAPortar().size(); i++) {
                     agregarFila(sheet, rowNum++,
@@ -201,11 +198,11 @@ public class ClienteResidencialExcelService {
             agregarFila(sheet, rowNum++, "SEGMENTO:", "");
             agregarFila(sheet, rowNum++, "COMENTARIOS RELEVANTES CON EL CLIENTE:", "");
             agregarFila(sheet, rowNum++, "COMERCIAL:", "");
-            agregarFila(sheet, rowNum++, "ASIGNADO A:", "");
+            agregarFila(sheet, rowNum++, "ASIGNADO A:", cliente.getUsuario().getNombre());
             agregarFila(sheet, rowNum++, "OBSERVACIONES:", "");
             agregarFila(sheet, rowNum++, "TIPO DE USUARIO:", "");
 
-            // Ajustar el ancho de las primeras columnas
+            // Ajustar el ancho de las columnas
             for (int i = 0; i < 3; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -219,6 +216,7 @@ public class ClienteResidencialExcelService {
             return new byte[0];
         }
     }
+
 
 
     /**

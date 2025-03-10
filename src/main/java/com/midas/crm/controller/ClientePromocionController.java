@@ -51,10 +51,23 @@ public class ClientePromocionController {
         return ResponseEntity.ok(clientes);
     }
 
+    /*
     @GetMapping("/cliente-promocion/movil/{movil}")
     public ResponseEntity<ClienteResidencial> obtenerClientePromocionPorMovil(@PathVariable String movil) {
         ClienteResidencial cliente = clienteService.buscarPorMovil(movil)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado con móvil: " + movil));
         return ResponseEntity.ok(cliente);
     }
+    */
+
+    @GetMapping("/cliente-promocion/movil/{movil}")
+    public ResponseEntity<ClienteResidencial> obtenerClientePromocionPorMovil(@PathVariable String movil) {
+        List<ClienteResidencial> clientes = clienteService.buscarPorMovil(movil);
+        if (clientes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado con móvil: " + movil);
+        }
+        // Retornar el primer registro encontrado
+        return ResponseEntity.ok(clientes.get(0));
+    }
+
 }

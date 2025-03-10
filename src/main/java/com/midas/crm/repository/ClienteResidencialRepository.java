@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,8 +25,8 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
     Page<ClienteConUsuarioDTO> obtenerClientesConUsuario(Pageable pageable);
 
 
-    Optional<ClienteResidencial> findByMovilContacto(String movilContacto);
-
+    // Cambia el método para permitir duplicados
+    List<ClienteResidencial> findByMovilContacto(String movilContacto);
 
     @Query("SELECT new com.midas.crm.entity.ClienteConUsuarioDTO(" +
             "u.dni, CONCAT(u.nombre, ' ', u.apellido), cr.fechaCreacion, cr.movilContacto) " +
