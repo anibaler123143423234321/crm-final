@@ -12,6 +12,9 @@ import java.util.List;
 
 public interface UserService {
     Page<User> findAllUsers(Pageable pageable);
+
+    User saveUserIndividual(User user);
+
     //List<User> findAllUsers();
     User saveUser(User user);
     Optional<User> findByEmail(String email);
@@ -22,11 +25,14 @@ public interface UserService {
     @Transactional
     void saveUsers(List<User> users);
 
+    @Transactional
+    void saveUsersBackOffice(List<User> users);
+
     User updateUser(Long id, User updateUser);
 
 
     // ============== Eliminar usuario ==================
-    boolean softDeleteUser(Long userId);
+    boolean deleteUser(Long userId);
 
     Page<User> searchAllFields(String query, Pageable pageable);
 }

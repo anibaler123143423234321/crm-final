@@ -39,10 +39,22 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    @PostMapping("/registrar")
+    public ResponseEntity<?> registrarUsuario(@RequestBody User user) {
+        try {
+            // Llama a saveUserIndividual, que solo guarda el usuario sin manipular token o sesión
+            User usuarioRegistrado = userService.saveUserIndividual(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuarioRegistrado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al registrar el usuario: " + e.getMessage());
+        }
+    }
+
 
     @PostMapping("crear-masivo-backoffice")
     public ResponseEntity<?> createBackofficeUsersFromExcel(@RequestParam("file") MultipartFile file) {
@@ -52,7 +64,7 @@ public class UserController {
 
         try {
             List<User> users = excelService.leerUsuariosDesdeExcelBackoffice(file);
-            userService.saveUsers(users); // Aquí se asume que saveUsers maneja la creación de usuarios.
+            userService.saveUsersBackOffice(users); // Aquí se asume que saveUsers maneja la creación de usuarios.
             return ResponseEntity.status(HttpStatus.CREATED).body("Usuarios BACKOFFICE cargados exitosamente.");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -152,12 +164,11 @@ public class UserController {
     // ============== NUEVO: Eliminar usuario ==================
 // Endpoint para soft delete: cambia estado a inactivo en lugar de eliminar físicamente
     @DeleteMapping("/soft/{userId}")
-    public ResponseEntity<?> softDeleteUser(@PathVariable Long userId) {
-        boolean inactivated = userService.softDeleteUser(userId);
-        if (inactivated) {
-            return ResponseEntity.ok("Usuario inactivado exitosamente.");
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        if (userService.deleteUser(userId)) {
+            return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado.");
+            return ResponseEntity.notFound().build();
         }
     }
 

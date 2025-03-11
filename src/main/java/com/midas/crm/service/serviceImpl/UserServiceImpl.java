@@ -73,6 +73,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User saveUserIndividual(User user) {
+        // Encripta la contraseña
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        System.out.println("Longitud de la contraseña cifrada: " + encodedPassword.length());
+        user.setPassword(encodedPassword);
+
+        // Asigna rol por defecto si no se envía uno
+        if (user.getRole() == null) {
+            user.setRole(Role.ASESOR);
+        }
+
+        // Configura el estado y fecha de creación; no genera token ni lo asigna
+        user.setEstado("A");
+        user.setFechaCreacion(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
+
+
+
+    @Override
     public User saveUser(User user) {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         System.out.println("Longitud de la contraseña cifrada: " + encodedPassword.length());
@@ -143,6 +164,28 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
+    @Override
+    public void saveUsersBackOffice(List<User> users) {
+        for (User user : users) {
+            // Validar si el usuario ya existe por username o por DNI
+            if (userRepository.existsByUsername(user.getUsername()) || userRepository.existsByDni(user.getDni())) {
+                continue; // Si el usuario o el DNI ya existen, saltar
+            }
+
+            // Generar el email automáticamente si no está presente
+            if (user.getEmail() == null || user.getEmail().isEmpty()) {
+                user.setEmail(user.getUsername() + "@midas.pe");
+            }
+
+            user.setRole(Role.BACKOFFICE); // Asignar rol por defecto
+            user.setPassword(passwordEncoder.encode(user.getPassword())); // Encriptar la contraseña
+            user.setEstado("A"); // Estado activo
+            user.setFechaCreacion(LocalDateTime.now()); // Fecha de creación actual
+            userRepository.save(user);
+        }
+    }
+
 
     public User updateUser(Long userId, User updateUser) {
         Optional<User> existingUserOpt = userRepository.findById(userId);
@@ -167,18 +210,14 @@ public class UserServiceImpl implements UserService {
 
     // ============== Eliminar usuario ==================
     @Override
-    public boolean softDeleteUser(Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            // Cambiamos el estado a "I" (inactivo) y actualizamos la fecha de eliminación
-            user.setEstado("I");
-            user.setDeletionTime(LocalDateTime.now());
-            userRepository.save(user);
+    public boolean deleteUser(Long userId) {
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
             return true;
         }
         return false;
     }
+
 
 
 
