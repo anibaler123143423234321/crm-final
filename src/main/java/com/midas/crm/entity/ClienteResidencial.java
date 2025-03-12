@@ -2,7 +2,6 @@ package com.midas.crm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -80,30 +79,32 @@ public class ClienteResidencial {
     @Column(name = "icc", length = 19, nullable = true)
     private String icc;
 
-    @Column(name = "moviles_a_portar")
+    // Se define la tabla auxiliar para almacenar la colección de móviles a portar
     @ElementCollection
+    @CollectionTable(
+            name = "cliente_residencial_moviles_aportar",
+            joinColumns = @JoinColumn(name = "cliente_residencial_id")
+    )
+    @Column(name = "movil", length = 255, nullable = true)
     @Builder.Default
     private List<String> movilesAPortar = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = true)
+    @JoinColumn(name = "usuario_id", referencedColumnName = "codi_usuario")
     private User usuario;
 
-    // ✅ NUEVOS CAMPOS PARA LAS AUTORIZACIONES
     @Column(name = "autoriza_seguros", nullable = true)
     @Builder.Default
-    private boolean autorizaSeguros = false;
+    private Boolean autorizaSeguros = false;
 
     @Column(name = "autoriza_energias", nullable = true)
     @Builder.Default
-    private boolean autorizaEnergias = false;
+    private Boolean autorizaEnergias = false;
 
-    // ✅ NUEVO CAMPO PARA CHECKEAR SI FUE VENTA
     @Column(name = "venta_realizada", nullable = true)
     @Builder.Default
-    private boolean ventaRealizada = false;
+    private Boolean ventaRealizada = false;
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
-
 }
