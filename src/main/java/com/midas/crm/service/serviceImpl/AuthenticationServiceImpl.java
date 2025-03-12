@@ -1,12 +1,10 @@
 package com.midas.crm.service.serviceImpl;
 
-import com.midas.crm.entity.TokenResponse;
 import com.midas.crm.entity.User;
 import com.midas.crm.repository.UserRepository;
 import com.midas.crm.security.UserPrincipal;
 import com.midas.crm.security.jwt.JwtProvider;
 import com.midas.crm.service.AuthenticationService;
-import com.midas.crm.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,16 +24,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private RefreshTokenService refreshTokenService;
-
     @Override
-    public TokenResponse signInAndReturnJWT(User signInRequest) {
+    public User signInAndReturnJWT(User signInRequest) {
         // Buscar el usuario por username
         User user = userRepository.findByUsername(signInRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + signInRequest.getUsername()));
 
-        // Autenticar usando username y password
+        // Autenticar usando el username y password (no el email)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         signInRequest.getUsername(),
@@ -46,30 +41,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         String jwt = jwtProvider.generateToken(userPrincipal);
 
-        // Generar refresh token para el usuario
-        String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
+        // Guardar el token en la entidad User si quieres retornarlo
+        User signInUser = userPrincipal.getUser();
+        signInUser.setToken(jwt);
 
-        // Opcional: puedes asignar el token a la entidad si lo deseas
-        user.setToken(jwt);
-
-        // Construir la respuesta con todos los datos necesarios
-        return new TokenResponse(
-                jwt,
-                refreshToken,
-                user.getId(),
-                user.getUsername(),
-                user.getNombre(),
-                user.getApellido(),
-                user.getDni(),
-                user.getEmail(),
-                user.getTelefono(),
-                user.getRole().name(),
-                user.getSede()
-        );
+        return signInUser;
     }
 
-    @Override
-    public TokenResponse refreshAccessToken(String refreshToken) {
-        return null;
-    }
+
+
 }

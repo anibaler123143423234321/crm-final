@@ -20,7 +20,9 @@ public interface UserService {
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
     void changeRole(Role newRole, String username);
+
     User findByUsernameReturnToken(String username);
+
     User findUserById(Long userId);
     @Transactional
     void saveUsers(List<User> users);

@@ -3,6 +3,7 @@ package com.midas.crm.service.serviceImpl;
 import com.midas.crm.entity.Role;
 import com.midas.crm.entity.User;
 import com.midas.crm.repository.UserRepository;
+import com.midas.crm.security.UserPrincipal;
 import com.midas.crm.security.jwt.JwtProvider;
 import com.midas.crm.service.UserService;
 import jakarta.transaction.Transactional;
@@ -126,7 +127,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("El usuario no existe:" + username));
 
-        String jwt = jwtProvider.generateToken(user);
+        String jwt = jwtProvider.generateToken(UserPrincipal.build(user));
         user.setToken(jwt);
         return user;
     }

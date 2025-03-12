@@ -1,6 +1,7 @@
 package com.midas.crm.security;
 
 import com.midas.crm.entity.User;
+import com.midas.crm.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -20,7 +23,7 @@ public class UserPrincipal implements UserDetails {
     private String username;
     private String password;
     private User user;           // Solo se usa al iniciar sesión como usuario
-    private Set<GrantedAuthority> authorities; // Se mantiene si es necesario
+    private Set<GrantedAuthority> authorities = new HashSet<>(); // Initialize with empty Set
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -63,11 +66,12 @@ public class UserPrincipal implements UserDetails {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.user = user;
+        this.authorities = Collections.singleton(SecurityUtils.convertToAuthority(user.getRole().name()));
     }
+
 
 
     public static UserPrincipal build(User user) {
         return new UserPrincipal(user);
     }
-
 }

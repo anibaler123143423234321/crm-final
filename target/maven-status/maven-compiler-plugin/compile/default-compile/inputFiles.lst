@@ -12,7 +12,6 @@ C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\entity\Role.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\entity\TokenResponse.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\entity\User.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\repository\ClienteResidencialRepository.java
-C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\repository\RefreshTokenRepository.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\repository\UserRepository.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\security\CustomUserDetailsService.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\security\jwt\JwtAuthorizationFilter.java
@@ -24,12 +23,12 @@ C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\Authenticat
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\ClienteResidencialExcelService.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\ClienteResidencialService.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\ExcelService.java
-C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\RefreshTokenService.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\serviceImpl\AuthenticationServiceImpl.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\serviceImpl\ClienteResidencialServiceImpl.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\serviceImpl\UserServiceImpl.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\service\UserService.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\utils\CustomExceptionHandler.java
+C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\utils\ErrorResponse.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\utils\SecurityUtils.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\utils\StringToLocalDateConverter.java
 C:\Users\dagne\Desktop\MIDAS\crm\src\main\java\com\midas\crm\utils\WebConfig.java

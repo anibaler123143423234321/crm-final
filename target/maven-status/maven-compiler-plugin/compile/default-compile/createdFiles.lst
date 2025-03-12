@@ -1,12 +1,10 @@
 com\midas\crm\controller\ClientePromocionController.class
 com\midas\crm\security\UserPrincipal.class
 com\midas\crm\service\serviceImpl\AuthenticationServiceImpl.class
-com\midas\crm\repository\RefreshTokenRepository.class
 com\midas\crm\controller\ApiProxyController.class
 com\midas\crm\entity\Role.class
 com\midas\crm\repository\UserRepository.class
 com\midas\crm\security\SecurityConfig.class
-com\midas\crm\service\RefreshTokenService.class
 com\midas\crm\security\UserPrincipal$UserPrincipalBuilder.class
 com\midas\crm\service\serviceImpl\ClienteResidencialServiceImpl.class
 com\midas\crm\CrmApplication.class
@@ -34,6 +32,7 @@ com\midas\crm\controller\ClienteResidencialController.class
 com\midas\crm\entity\ClientePromocionBody.class
 com\midas\crm\utils\SecurityUtils.class
 com\midas\crm\controller\UserController.class
+com\midas\crm\utils\ErrorResponse.class
 com\midas\crm\entity\User.class
 com\midas\crm\service\serviceImpl\UserServiceImpl.class
 com\midas\crm\entity\ClienteConUsuarioDTO.class
