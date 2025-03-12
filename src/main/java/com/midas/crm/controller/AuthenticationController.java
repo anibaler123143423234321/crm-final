@@ -1,6 +1,7 @@
 package com.midas.crm.controller;
 
 
+import com.midas.crm.entity.TokenResponse;
 import com.midas.crm.entity.User;
 import com.midas.crm.service.AuthenticationService;
 import com.midas.crm.service.UserService;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,12 +42,22 @@ public class AuthenticationController {
         return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
-
     @PostMapping("sign-in")
-    public ResponseEntity<?> signIn(@RequestBody User user)
-    {
-        return new ResponseEntity<>(authenticationService.signInAndReturnJWT(user), HttpStatus.OK);
+    public ResponseEntity<?> signIn(@RequestBody User user) {
+        TokenResponse tokenResponse = authenticationService.signInAndReturnJWT(user);
+        return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 
 
+    @PostMapping("refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        try {
+            TokenResponse tokenResponse = authenticationService.refreshAccessToken(refreshToken);
+            return ResponseEntity.ok(tokenResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Refresh token inválido o expirado");
+        }
+    }
 }

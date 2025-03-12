@@ -82,7 +82,8 @@ public class SecurityConfig {
                                 "/api/registerMessagingToken",
                                 "/api/fcm/send",
                                 "/api/numbers/{number}",
-                                "/api/bulk"
+                                "/api/bulk",
+                                "/api/authentication/refresh-token"
 
                         ).permitAll()
                         .anyRequest().authenticated()
