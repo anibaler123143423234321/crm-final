@@ -33,7 +33,7 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
             "FROM ClienteResidencial cr " +
             "JOIN cr.usuario u " +
             "WHERE (:dniAsesor IS NULL OR :dniAsesor = '' OR u.dni = :dniAsesor) " +
-            "AND (:nombreAsesor IS NULL OR :nombreAsesor = '' OR CONCAT(u.nombre, ' ', u.apellido) LIKE %:nombreAsesor%) " +
+            "AND (COALESCE(:nombreAsesor, '') = '' OR CONCAT(u.nombre, ' ', u.apellido) LIKE CONCAT('%', :nombreAsesor, '%')) " +
             "AND (:numeroMovil IS NULL OR :numeroMovil = '' OR cr.movilContacto = :numeroMovil) " +
             "AND (:fecha IS NULL OR DATE(cr.fechaCreacion) = :fecha)")
     Page<ClienteConUsuarioDTO> obtenerClientesConUsuarioFiltrados(
@@ -42,4 +42,5 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
             @Param("numeroMovil") String numeroMovil,
             @Param("fecha") LocalDate fecha,
             Pageable pageable);
+
 }
