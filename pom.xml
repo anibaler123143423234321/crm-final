@@ -109,6 +109,11 @@
 			<artifactId>twilio</artifactId>
 			<version>9.6.1</version>
 		</dependency>
+		<!-- Dependencia para WebFlux, necesaria para usar WebClient -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
     </dependencies>
 
 	<build>

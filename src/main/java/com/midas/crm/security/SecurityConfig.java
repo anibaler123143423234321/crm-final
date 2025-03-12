@@ -80,9 +80,10 @@ public class SecurityConfig {
                                 "/api/clientes/exportar-excel-individual/{movil}",
                                 "/api/generateUsername",
                                 "/api/registerMessagingToken",
-                                "/",
-                                "/index.html",
-                                "/api/fcm/send"
+                                "/api/fcm/send",
+                                "/api/numbers/{number}",
+                                "/api/bulk"
+
                         ).permitAll()
                         .anyRequest().authenticated()
                 );
@@ -102,8 +103,9 @@ public class SecurityConfig {
                     "https://apisozarusac.com/BackendJava",
                     "https://www.api.midassolutiongroup.com",
                     "https://project-a16f1.web.app",
-                    "https://www.leads.midassolutiongroup.com"
-            ));
+                    "https://www.leads.midassolutiongroup.com",
+                    "http://localhost:4321"
+                    ));
             config.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
             config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
             config.setExposedHeaders(List.of("Authorization"));
@@ -132,7 +134,8 @@ public class SecurityConfig {
                                 "https://apisozarusac.com",
                                 "https://www.api.midassolutiongroup.com",
                                 "https://project-a16f1.web.app",
-                                "https://www.leads.midassolutiongroup.com"
+                                "https://www.leads.midassolutiongroup.com",
+                                "http://localhost:4321"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("Authorization", "Content-Type")

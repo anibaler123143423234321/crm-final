@@ -1,6 +1,7 @@
 com\midas\crm\controller\ClientePromocionController.class
 com\midas\crm\security\UserPrincipal.class
 com\midas\crm\service\serviceImpl\AuthenticationServiceImpl.class
+com\midas\crm\controller\ApiProxyController.class
 com\midas\crm\entity\Role.class
 com\midas\crm\repository\UserRepository.class
 com\midas\crm\security\SecurityConfig.class
