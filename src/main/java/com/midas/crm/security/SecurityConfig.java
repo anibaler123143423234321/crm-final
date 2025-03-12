@@ -104,7 +104,8 @@ public class SecurityConfig {
                     "https://www.api.midassolutiongroup.com",
                     "https://project-a16f1.web.app",
                     "https://www.leads.midassolutiongroup.com",
-                    "http://localhost:4321"
+                    "http://localhost:4321",
+                    "https://consultanumero.midassolutiongroup.com"
                     ));
             config.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
             config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
@@ -135,7 +136,8 @@ public class SecurityConfig {
                                 "https://www.api.midassolutiongroup.com",
                                 "https://project-a16f1.web.app",
                                 "https://www.leads.midassolutiongroup.com",
-                                "http://localhost:4321"
+                                "http://localhost:4321",
+                                "https://consultanumero.midassolutiongroup.com"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("Authorization", "Content-Type")
