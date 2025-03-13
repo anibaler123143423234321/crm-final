@@ -43,4 +43,18 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
             @Param("fecha") LocalDate fecha,
             Pageable pageable);
 
+
+    @Query("SELECT new com.midas.crm.entity.ClienteConUsuarioDTO(" +
+            "u.dni, CONCAT(u.nombre, ' ', u.apellido), cr.fechaCreacion, cr.movilContacto) " +
+            "FROM ClienteResidencial cr " +
+            "JOIN cr.usuario u " +
+            "WHERE (:dniAsesor IS NULL OR :dniAsesor = '' OR u.dni = :dniAsesor) " +
+            "AND (COALESCE(:nombreAsesor, '') = '' OR CONCAT(u.nombre, ' ', u.apellido) LIKE CONCAT('%', :nombreAsesor, '%')) " +
+            "AND (:numeroMovil IS NULL OR :numeroMovil = '' OR cr.movilContacto = :numeroMovil) " +
+            "AND DATE(cr.fechaCreacion) = CURRENT_DATE")
+    Page<ClienteConUsuarioDTO> obtenerClientesConUsuarioFiltradosPorFechaActual(
+            @Param("dniAsesor") String dniAsesor,
+            @Param("nombreAsesor") String nombreAsesor,
+            @Param("numeroMovil") String numeroMovil,
+            Pageable pageable);
 }

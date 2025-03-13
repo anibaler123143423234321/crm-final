@@ -73,6 +73,7 @@ public class SecurityConfig {
                                 "/api/user/soft/**",
                                 "/api/clientes/con-usuario",
                                 "/api/clientes/con-usuario-filtrados",
+                                "/api/clientes/con-usuario-filtrados-fecha",
                                 "/api/clientes/exportar-excel-individual/{movil}",
                                 "/api/clientes/exportar-excel-masivo",
                                 "/api/cliente-promocion/movil/{movil}",

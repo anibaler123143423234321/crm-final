@@ -7,7 +7,8 @@ import com.midas.crm.security.UserPrincipal;
 import com.midas.crm.security.jwt.JwtProvider;
 import com.midas.crm.service.UserService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,54 +20,39 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtProvider jwtProvider;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtProvider = jwtProvider;
-        // Inicializar el usuario ADMIN
-        initializeAdminUser();
-    }
-
-    /*@Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
-    }
-    */
-
-    // Método para inicializar el usuario ADMIN
+    // Inicializa el usuario ADMIN si aún no existe
     private void initializeAdminUser() {
-        if (!userRepository.existsByUsername("70680710") && !userRepository.existsByDni("70680710")) {
-            User adminUser = new User();
-            adminUser.setUsername("70680710");
-            adminUser.setPassword(passwordEncoder.encode("$olutions2K25."));
-            adminUser.setNombre("Andree");
-            adminUser.setApellido("Admin");
-            adminUser.setTelefono("123456789");
-            adminUser.setSede("Chiclayo");
-            adminUser.setDni("70680710");
-            adminUser.setEmail("admin@midas.pe");
-            adminUser.setFechaCreacion(LocalDateTime.now());
-            adminUser.setRole(Role.ADMIN);
-            adminUser.setEstado("A");
-            userRepository.save(adminUser);
-            System.out.println("Usuario ADMIN creado exitosamente.");
-        } else {
-            System.out.println("El usuario ADMIN ya existe.");
+        try {
+            if (!userRepository.existsByUsername("70680710") && !userRepository.existsByDni("70680710")) {
+                User adminUser = new User();
+                adminUser.setUsername("70680710");
+                adminUser.setPassword(passwordEncoder.encode("$olutions2K25."));
+                adminUser.setNombre("Andree");
+                adminUser.setApellido("Admin");
+                adminUser.setTelefono("123456789");
+                adminUser.setSede("Chiclayo");
+                adminUser.setDni("70680710");
+                adminUser.setEmail("admin@midas.pe");
+                adminUser.setFechaCreacion(LocalDateTime.now());
+                adminUser.setRole(Role.ADMIN);
+                adminUser.setEstado("A");
+                userRepository.save(adminUser);
+                log.info("Usuario ADMIN creado exitosamente.");
+            } else {
+                log.info("El usuario ADMIN ya existe.");
+            }
+        } catch (Exception e) {
+            log.error("Error al inicializar el usuario ADMIN", e);
         }
     }
-
 
     @Override
     public Page<User> findAllUsers(Pageable pageable) {
@@ -75,58 +61,48 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUserIndividual(User user) {
-        // Encripta la contraseña
         String encodedPassword = passwordEncoder.encode(user.getPassword());
-        System.out.println("Longitud de la contraseña cifrada: " + encodedPassword.length());
+        log.debug("Longitud de la contraseña cifrada: {}", encodedPassword.length());
         user.setPassword(encodedPassword);
-
-        // Asigna rol por defecto si no se envía uno
         if (user.getRole() == null) {
             user.setRole(Role.ASESOR);
         }
-
-        // Configura el estado y fecha de creación; no genera token ni lo asigna
         user.setEstado("A");
         user.setFechaCreacion(LocalDateTime.now());
-
         return userRepository.save(user);
     }
-
-
 
     @Override
     public User saveUser(User user) {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
-        System.out.println("Longitud de la contraseña cifrada: " + encodedPassword.length());
+        log.debug("Longitud de la contraseña cifrada: {}", encodedPassword.length());
         user.setPassword(encodedPassword);
         user.setRole(Role.ASESOR);
-        user.setEstado("A"); // Estado "A" de Activo
+        user.setEstado("A");
         user.setFechaCreacion(LocalDateTime.now());
         return userRepository.save(user);
     }
 
-
     @Override
-    public Optional<User> findByUsername(String username)
-    {
+    public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
     @Override
-    public Optional<User> findByEmail(String email) {return userRepository.findByEmail(email);}
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
     @Transactional
     @Override
-    public void changeRole(Role newRole, String username)
-    {
+    public void changeRole(Role newRole, String username) {
         userRepository.updateUserRole(username, newRole);
     }
 
     @Override
-    public User findByUsernameReturnToken(String username)
-    {
+    public User findByUsernameReturnToken(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("El usuario no existe:" + username));
-
+                .orElseThrow(() -> new UsernameNotFoundException("El usuario no existe: " + username));
         String jwt = jwtProvider.generateToken(UserPrincipal.build(user));
         user.setToken(jwt);
         return user;
@@ -134,82 +110,59 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserById(Long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if (optionalUser.isPresent()) {
-            return optionalUser.get();
-        } else {
-            return null;
-        }
+        return userRepository.findById(userId).orElse(null);
     }
 
     @Transactional
     @Override
     public void saveUsers(List<User> users) {
-        for (User user : users) {
-            // Validar si el usuario ya existe por username o por DNI
+        users.forEach(user -> {
             if (userRepository.existsByUsername(user.getUsername()) || userRepository.existsByDni(user.getDni())) {
-                continue; // Si el usuario o el DNI ya existen, saltar
+                return; // Salta si ya existe
             }
-
-            // Generar el email automáticamente si no está presente
             if (user.getEmail() == null || user.getEmail().isEmpty()) {
                 user.setEmail(user.getUsername() + "@midas.pe");
             }
-
-            user.setRole(Role.ASESOR); // Asignar rol por defecto
-            user.setPassword(passwordEncoder.encode(user.getPassword())); // Encriptar la contraseña
-            user.setEstado("A"); // Estado activo
-            user.setFechaCreacion(LocalDateTime.now()); // Fecha de creación actual
+            user.setRole(Role.ASESOR);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setEstado("A");
+            user.setFechaCreacion(LocalDateTime.now());
             userRepository.save(user);
-        }
+        });
     }
 
     @Transactional
     @Override
     public void saveUsersBackOffice(List<User> users) {
-        for (User user : users) {
-            // Validar si el usuario ya existe por username o por DNI
+        users.forEach(user -> {
             if (userRepository.existsByUsername(user.getUsername()) || userRepository.existsByDni(user.getDni())) {
-                continue; // Si el usuario o el DNI ya existen, saltar
+                return;
             }
-
-            // Generar el email automáticamente si no está presente
             if (user.getEmail() == null || user.getEmail().isEmpty()) {
                 user.setEmail(user.getUsername() + "@midas.pe");
             }
-
-            user.setRole(Role.BACKOFFICE); // Asignar rol por defecto
-            user.setPassword(passwordEncoder.encode(user.getPassword())); // Encriptar la contraseña
-            user.setEstado("A"); // Estado activo
-            user.setFechaCreacion(LocalDateTime.now()); // Fecha de creación actual
+            user.setRole(Role.BACKOFFICE);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setEstado("A");
+            user.setFechaCreacion(LocalDateTime.now());
             userRepository.save(user);
-        }
+        });
     }
 
-
+    @Override
     public User updateUser(Long userId, User updateUser) {
-        Optional<User> existingUserOpt = userRepository.findById(userId);
-        if(existingUserOpt.isPresent()){
-            User existingUser = existingUserOpt.get();
-            // Actualiza los campos que deseas modificar
+        return userRepository.findById(userId).map(existingUser -> {
             existingUser.setNombre(updateUser.getNombre());
             existingUser.setApellido(updateUser.getApellido());
             existingUser.setUsername(updateUser.getUsername());
             existingUser.setSede(updateUser.getSede());
             existingUser.setTelefono(updateUser.getTelefono());
             existingUser.setEmail(updateUser.getEmail());
-            // Asegúrate de actualizar también el estado (Activo/Inactivo)
             existingUser.setEstado(updateUser.getEstado());
-            // ... Actualiza otros campos si es necesario
-
             return userRepository.save(existingUser);
-        }
-        return null;
+        }).orElse(null);
     }
 
-
-    // ============== Eliminar usuario ==================
     @Override
     public boolean deleteUser(Long userId) {
         if (userRepository.existsById(userId)) {
@@ -218,9 +171,6 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-
-
-
 
     @Override
     public Page<User> searchAllFields(String query, Pageable pageable) {

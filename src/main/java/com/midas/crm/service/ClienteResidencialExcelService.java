@@ -197,8 +197,8 @@ public class ClienteResidencialExcelService {
             agregarFila(sheet, rowNum++, "PRECIO REAL O DESPUÉS DE PROMOCIÓN:", "");
             agregarFila(sheet, rowNum++, "SEGMENTO:", "");
             agregarFila(sheet, rowNum++, "COMENTARIOS RELEVANTES CON EL CLIENTE:", "");
-            agregarFila(sheet, rowNum++, "COMERCIAL:", "");
-            agregarFila(sheet, rowNum++, "ASIGNADO A:", cliente.getUsuario().getNombre());
+            agregarFila(sheet, rowNum++, "COMERCIAL:", cliente.getUsuario().getNombre());
+            agregarFila(sheet, rowNum++, "ASIGNADO A:","");
             agregarFila(sheet, rowNum++, "OBSERVACIONES:", "");
             agregarFila(sheet, rowNum++, "TIPO DE USUARIO:", "");
 

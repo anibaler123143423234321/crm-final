@@ -54,6 +54,27 @@ public class ClienteResidencialController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/con-usuario-filtrados-fecha")
+    public ResponseEntity<Map<String, Object>> obtenerClientesConUsuarioFiltradosPorFechaActual(
+            @RequestParam(required = false) String dniAsesor,
+            @RequestParam(required = false) String nombreAsesor,
+            @RequestParam(required = false) String numeroMovil,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable paging = PageRequest.of(page, size);
+        Page<ClienteConUsuarioDTO> pageClientes = clienteResidencialService
+                .obtenerClientesConUsuarioFiltradosPorFechaActual(dniAsesor, nombreAsesor, numeroMovil, paging);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("clientes", pageClientes.getContent());
+        response.put("currentPage", pageClientes.getNumber());
+        response.put("totalItems", pageClientes.getTotalElements());
+        response.put("totalPages", pageClientes.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
     @GetMapping("/con-usuario-filtrados")
     public ResponseEntity<Map<String, Object>> obtenerClientesConUsuarioFiltrados(
@@ -124,5 +145,7 @@ public class ClienteResidencialController {
 
         return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
     }
+
+
 
 }
