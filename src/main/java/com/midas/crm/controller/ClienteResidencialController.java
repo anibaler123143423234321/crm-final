@@ -1,6 +1,7 @@
 package com.midas.crm.controller;
 
 import com.midas.crm.entity.ClienteConUsuarioDTO;
+import com.midas.crm.entity.ClienteResidencial;
 import com.midas.crm.service.ClienteResidencialExcelService;
 import com.midas.crm.service.ClienteResidencialService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -74,7 +76,6 @@ public class ClienteResidencialController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
     @GetMapping("/con-usuario-filtrados")
     public ResponseEntity<Map<String, Object>> obtenerClientesConUsuarioFiltrados(
@@ -141,6 +142,49 @@ public class ClienteResidencialController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cliente_residencial_" + movil + ".xlsx");
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarCliente(@PathVariable Long id,
+                                               @RequestBody ClienteResidencial cliente) {
+        try {
+            ClienteResidencial clienteActualizado = clienteResidencialService.actualizar(id, cliente);
+            return ResponseEntity.ok(clienteActualizado);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cliente no encontrado con id: " + id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el cliente");
+        }
+    }
+
+    /**
+     * Endpoint para exportar a Excel los clientes filtrados por una fecha dada.
+     * Ejemplo: /api/clientes/exportar-excel-por-fecha?fecha=2025-03-13
+     */
+    @GetMapping("/exportar-excel-por-fecha")
+    public ResponseEntity<byte[]> exportarExcelPorFecha(@RequestParam("fecha") String fechaStr) {
+        LocalDate fecha;
+        try {
+            // Se espera que la fecha esté en formato "yyyy-MM-dd"
+            fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        byte[] excelData = clienteResidencialExcelService.generarExcelClientesPorFecha(fecha);
+        if (excelData == null || excelData.length == 0) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+
+        // Para el nombre del archivo usamos el mismo formato ISO (por ejemplo, "2025-03-13")
+        String fechaArchivo = fecha.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=clientes_residenciales_" + fechaArchivo + ".xlsx");
         headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
         return new ResponseEntity<>(excelData, headers, HttpStatus.OK);

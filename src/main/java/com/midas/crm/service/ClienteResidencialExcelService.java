@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -218,6 +221,110 @@ public class ClienteResidencialExcelService {
     }
 
 
+    /**
+     * Método para exportar a Excel los clientes filtrados por fecha de creación.
+     * Se reciben los clientes cuya fecha de creación esté entre el inicio y el final del día proporcionado.
+     */
+    public byte[] generarExcelClientesPorFecha(LocalDate fecha) {
+        // Definir el rango del día (00:00 hasta 23:59:59)
+        LocalDateTime inicioDelDia = fecha.atStartOfDay();
+        LocalDateTime finDelDia = fecha.atTime(LocalTime.MAX);
+
+        List<ClienteResidencial> clientes = clienteResidencialRepository.findByFechaCreacionBetween(inicioDelDia, finDelDia);
+        if (clientes == null || clientes.isEmpty()) {
+            return new byte[0];
+        }
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Clientes " + fecha);
+
+            CellStyle headerStyle = crearEstiloEncabezado(workbook);
+
+            // Encabezado (fila 0) – se pueden utilizar los mismos encabezados que en el Excel masivo
+            Row headerRow = sheet.createRow(0);
+            crearCeldaConEstilo(headerRow, 0, "CAMPAÑA", headerStyle);
+            crearCeldaConEstilo(headerRow, 1, "NOMBRES Y APELLIDOS", headerStyle);
+            crearCeldaConEstilo(headerRow, 2, "NIF/NIE", headerStyle);
+            crearCeldaConEstilo(headerRow, 3, "NACIONALIDAD", headerStyle);
+            crearCeldaConEstilo(headerRow, 4, "FECHA DE NACIMIENTO", headerStyle);
+            crearCeldaConEstilo(headerRow, 5, "GÉNERO", headerStyle);
+            crearCeldaConEstilo(headerRow, 6, "CORREO ELECTRÓNICO", headerStyle);
+            crearCeldaConEstilo(headerRow, 7, "CUENTA BANCARIA", headerStyle);
+            crearCeldaConEstilo(headerRow, 8, "DIRECCIÓN", headerStyle);
+            crearCeldaConEstilo(headerRow, 9, "TIPO DE FIBRA", headerStyle);
+            crearCeldaConEstilo(headerRow, 10, "HORA DE INSTALACIÓN", headerStyle);
+
+            // Datos de la promoción y otros campos (puedes ajustar según tus necesidades)
+            crearCeldaConEstilo(headerRow, 11, "PROMOCIÓN", headerStyle);
+            crearCeldaConEstilo(headerRow, 12, "TV/DECO", headerStyle);
+            crearCeldaConEstilo(headerRow, 13, "GRABACIÓN OCM", headerStyle);
+            crearCeldaConEstilo(headerRow, 14, "MOVIL CONTACTO", headerStyle);
+            crearCeldaConEstilo(headerRow, 15, "FIJO/COMPAÑÍA", headerStyle);
+            crearCeldaConEstilo(headerRow, 16, "MOVILES A PORTAR", headerStyle);
+            crearCeldaConEstilo(headerRow, 17, "PRECIO PROMOCIÓN/TIEMPO", headerStyle);
+            crearCeldaConEstilo(headerRow, 18, "PRECIO REAL O DESPUÉS DE PROMOCIÓN", headerStyle);
+            crearCeldaConEstilo(headerRow, 19, "SEGMENTO", headerStyle);
+            crearCeldaConEstilo(headerRow, 20, "COMENTARIOS RELEVANTES", headerStyle);
+            crearCeldaConEstilo(headerRow, 21, "COMERCIAL", headerStyle);
+            crearCeldaConEstilo(headerRow, 22, "ASIGNADO A", headerStyle);
+            crearCeldaConEstilo(headerRow, 23, "OBSERVACIONES", headerStyle);
+            crearCeldaConEstilo(headerRow, 24, "TIPO DE USUARIO", headerStyle);
+
+            // Rellenar datos fila a fila
+            int rowIndex = 1;
+            for (ClienteResidencial cliente : clientes) {
+                Row dataRow = sheet.createRow(rowIndex++);
+
+                dataRow.createCell(0).setCellValue(cliente.getCampania() != null ? cliente.getCampania() : "");
+                dataRow.createCell(1).setCellValue(cliente.getNombresApellidos() != null ? cliente.getNombresApellidos() : "");
+                dataRow.createCell(2).setCellValue(cliente.getNifNie() != null ? cliente.getNifNie() : "");
+                dataRow.createCell(3).setCellValue(cliente.getNacionalidad() != null ? cliente.getNacionalidad() : "");
+                dataRow.createCell(4).setCellValue(cliente.getFechaNacimiento() != null ? cliente.getFechaNacimiento().toString() : "");
+                dataRow.createCell(5).setCellValue(cliente.getGenero() != null ? cliente.getGenero() : "");
+                dataRow.createCell(6).setCellValue(cliente.getCorreoElectronico() != null ? cliente.getCorreoElectronico() : "");
+                dataRow.createCell(7).setCellValue(cliente.getCuentaBancaria() != null ? cliente.getCuentaBancaria() : "");
+                dataRow.createCell(8).setCellValue(cliente.getDireccion() != null ? cliente.getDireccion() : "");
+                dataRow.createCell(9).setCellValue(cliente.getTipoFibra() != null ? cliente.getTipoFibra() : "");
+                dataRow.createCell(10).setCellValue(""); // Hora de instalación
+
+                dataRow.createCell(11).setCellValue(cliente.getPlanActual() != null ? cliente.getPlanActual() : "");
+                dataRow.createCell(12).setCellValue(""); // TV/DECO
+                dataRow.createCell(13).setCellValue(""); // Grabación OCM
+                dataRow.createCell(14).setCellValue(cliente.getMovilContacto() != null ? cliente.getMovilContacto() : "");
+                dataRow.createCell(15).setCellValue(cliente.getFijoCompania() != null ? cliente.getFijoCompania() : "");
+
+                // Móviles a portar concatenados
+                if (cliente.getMovilesAPortar() != null && !cliente.getMovilesAPortar().isEmpty()) {
+                    String movilesConcatenados = String.join(", ", cliente.getMovilesAPortar());
+                    dataRow.createCell(16).setCellValue(movilesConcatenados);
+                } else {
+                    dataRow.createCell(16).setCellValue("");
+                }
+
+                dataRow.createCell(17).setCellValue(""); // Precio promoción/tiempo
+                dataRow.createCell(18).setCellValue(""); // Precio real
+                dataRow.createCell(19).setCellValue(""); // Segmento
+                dataRow.createCell(20).setCellValue(""); // Comentarios
+                dataRow.createCell(21).setCellValue(cliente.getUsuario() != null ? cliente.getUsuario().getNombre() : "");
+                dataRow.createCell(22).setCellValue(""); // Asignado a
+                dataRow.createCell(23).setCellValue(""); // Observaciones
+                dataRow.createCell(24).setCellValue(""); // Tipo de usuario
+            }
+
+            // Ajustar el ancho de las columnas
+            for (int i = 0; i < 25; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
 
     /**
      * =========================================================================

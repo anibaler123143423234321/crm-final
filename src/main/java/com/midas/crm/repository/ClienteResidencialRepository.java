@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,4 +58,7 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
             @Param("nombreAsesor") String nombreAsesor,
             @Param("numeroMovil") String numeroMovil,
             Pageable pageable);
+
+    List<ClienteResidencial> findByFechaCreacionBetween(LocalDateTime start, LocalDateTime end);
+
 }
