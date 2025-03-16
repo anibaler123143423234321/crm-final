@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -63,4 +64,12 @@ public class User {
 
     @Column(name = "sede", nullable = true, length = 100)
     private String sede; // Nueva columna para la sede a la que pertenece el usuario
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coordinador_id")
+    private User coordinador;
+
+    @OneToMany(mappedBy = "coordinador", fetch = FetchType.LAZY)
+    private List<User> asesores;
 }

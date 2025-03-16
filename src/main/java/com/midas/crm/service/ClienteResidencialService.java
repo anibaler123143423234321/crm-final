@@ -5,12 +5,10 @@ import com.midas.crm.entity.ClienteConUsuarioDTO;
 import com.midas.crm.entity.ClienteResidencial;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ClienteResidencialService {
     List<ClienteResidencial> listarTodos();

@@ -2,29 +2,25 @@ package com.midas.crm.controller;
 
 import com.midas.crm.entity.ClienteConUsuarioDTO;
 import com.midas.crm.entity.ClienteResidencial;
+import com.midas.crm.exceptions.MidasExceptions;
 import com.midas.crm.service.ClienteResidencialExcelService;
 import com.midas.crm.service.ClienteResidencialService;
+import com.midas.crm.utils.GenericResponse;
+import com.midas.crm.utils.GenericResponseConstants;
+import com.midas.crm.utils.MidasErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -40,7 +36,7 @@ public class ClienteResidencialController {
 
     // ✅ Endpoint para obtener todos los clientes con usuario (sin filtros)
     @GetMapping("/con-usuario")
-    public ResponseEntity<Map<String, Object>> obtenerClientesConUsuario(
+    public ResponseEntity<GenericResponse<Map<String, Object>>> obtenerClientesConUsuario(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
@@ -53,11 +49,17 @@ public class ClienteResidencialController {
         response.put("totalItems", pageClientes.getTotalElements());
         response.put("totalPages", pageClientes.getTotalPages());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(
+                new GenericResponse<>(
+                        GenericResponseConstants.SUCCESS,
+                        "Clientes con usuario obtenidos correctamente",
+                        response
+                )
+        );
     }
 
     @GetMapping("/con-usuario-filtrados-fecha")
-    public ResponseEntity<Map<String, Object>> obtenerClientesConUsuarioFiltradosPorFechaActual(
+    public ResponseEntity<GenericResponse<Map<String, Object>>> obtenerClientesConUsuarioFiltradosPorFechaActual(
             @RequestParam(required = false) String dniAsesor,
             @RequestParam(required = false) String nombreAsesor,
             @RequestParam(required = false) String numeroMovil,
@@ -74,11 +76,17 @@ public class ClienteResidencialController {
         response.put("totalItems", pageClientes.getTotalElements());
         response.put("totalPages", pageClientes.getTotalPages());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(
+                new GenericResponse<>(
+                        GenericResponseConstants.SUCCESS,
+                        "Clientes filtrados por fecha actual obtenidos correctamente",
+                        response
+                )
+        );
     }
 
     @GetMapping("/con-usuario-filtrados")
-    public ResponseEntity<Map<String, Object>> obtenerClientesConUsuarioFiltrados(
+    public ResponseEntity<GenericResponse<Map<String, Object>>> obtenerClientesConUsuarioFiltrados(
             @RequestParam(required = false) String dniAsesor,
             @RequestParam(required = false) String nombreAsesor,
             @RequestParam(required = false) String numeroMovil,
@@ -92,7 +100,7 @@ public class ClienteResidencialController {
             try {
                 fechaLocalDate = LocalDate.parse(fecha, DateTimeFormatter.ISO_DATE);
             } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("Formato de fecha inválido. Use el formato yyyy-MM-dd.");
+                throw new MidasExceptions(MidasErrorMessage.CLIENTERESIDENCIAL_INVALID_DATA);
             }
         }
 
@@ -106,7 +114,13 @@ public class ClienteResidencialController {
         response.put("totalItems", pageClientes.getTotalElements());
         response.put("totalPages", pageClientes.getTotalPages());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(
+                new GenericResponse<>(
+                        GenericResponseConstants.SUCCESS,
+                        "Clientes filtrados obtenidos correctamente",
+                        response
+                )
+        );
     }
 
     /**
@@ -114,17 +128,24 @@ public class ClienteResidencialController {
      */
     @GetMapping("/exportar-excel-masivo")
     public ResponseEntity<byte[]> exportarExcelMasivo() {
-        byte[] excelData = clienteResidencialExcelService.generarExcelClientesMasivo();
+        try {
+            byte[] excelData = clienteResidencialExcelService.generarExcelClientesMasivo();
 
-        if (excelData == null || excelData.length == 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+            if (excelData == null || excelData.length == 0) {
+                throw new MidasExceptions(MidasErrorMessage.ERROR_INTERNAL);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=clientes_residenciales_masivo.xlsx");
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            if (!(e instanceof MidasExceptions)) {
+                throw new MidasExceptions(MidasErrorMessage.ERROR_INTERNAL);
+            }
+            throw e;
         }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=clientes_residenciales_masivo.xlsx");
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
     }
 
     /**
@@ -133,32 +154,46 @@ public class ClienteResidencialController {
      */
     @GetMapping("/exportar-excel-individual/{movil}")
     public ResponseEntity<byte[]> exportarExcelIndividual(@PathVariable String movil) {
-        byte[] excelData = clienteResidencialExcelService.generarExcelClienteIndividual(movil);
+        try {
+            byte[] excelData = clienteResidencialExcelService.generarExcelClienteIndividual(movil);
 
-        if (excelData == null || excelData.length == 0) {
-            // Si no se encontró el cliente o el Excel quedó vacío
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+            if (excelData == null || excelData.length == 0) {
+                throw new MidasExceptions(MidasErrorMessage.CLIENTERESIDENCIAL_NOT_FOUND);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cliente_residencial_" + movil + ".xlsx");
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            if (!(e instanceof MidasExceptions)) {
+                throw new MidasExceptions(MidasErrorMessage.ERROR_INTERNAL);
+            }
+            throw e;
         }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cliente_residencial_" + movil + ".xlsx");
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarCliente(@PathVariable Long id,
-                                               @RequestBody ClienteResidencial cliente) {
+    public ResponseEntity<GenericResponse<ClienteResidencial>> actualizarCliente(
+            @PathVariable Long id,
+            @RequestBody ClienteResidencial cliente) {
         try {
             ClienteResidencial clienteActualizado = clienteResidencialService.actualizar(id, cliente);
-            return ResponseEntity.ok(clienteActualizado);
+            return ResponseEntity.ok(
+                    new GenericResponse<>(
+                            GenericResponseConstants.SUCCESS,
+                            "Cliente actualizado correctamente",
+                            clienteActualizado
+                    )
+            );
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Cliente no encontrado con id: " + id);
+            throw new MidasExceptions(MidasErrorMessage.CLIENTERESIDENCIAL_NOT_FOUND);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al actualizar el cliente");
+            if (!(e instanceof MidasExceptions)) {
+                throw new MidasExceptions(MidasErrorMessage.ERROR_INTERNAL);
+            }
+            throw e;
         }
     }
 
@@ -173,23 +208,27 @@ public class ClienteResidencialController {
             // Se espera que la fecha esté en formato "yyyy-MM-dd"
             fecha = LocalDate.parse(fechaStr, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null);
+            throw new MidasExceptions(MidasErrorMessage.CLIENTERESIDENCIAL_INVALID_DATA);
         }
 
-        byte[] excelData = clienteResidencialExcelService.generarExcelClientesPorFecha(fecha);
-        if (excelData == null || excelData.length == 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        try {
+            byte[] excelData = clienteResidencialExcelService.generarExcelClientesPorFecha(fecha);
+            if (excelData == null || excelData.length == 0) {
+                throw new MidasExceptions(MidasErrorMessage.CLIENTERESIDENCIAL_NOT_FOUND);
+            }
+
+            // Para el nombre del archivo usamos el mismo formato ISO (por ejemplo, "2025-03-13")
+            String fechaArchivo = fecha.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=clientes_residenciales_" + fechaArchivo + ".xlsx");
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            if (!(e instanceof MidasExceptions)) {
+                throw new MidasExceptions(MidasErrorMessage.ERROR_INTERNAL);
+            }
+            throw e;
         }
-
-        // Para el nombre del archivo usamos el mismo formato ISO (por ejemplo, "2025-03-13")
-        String fechaArchivo = fecha.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=clientes_residenciales_" + fechaArchivo + ".xlsx");
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
     }
-
-
-
 }

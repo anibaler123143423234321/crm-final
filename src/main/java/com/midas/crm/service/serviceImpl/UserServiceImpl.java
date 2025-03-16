@@ -201,4 +201,14 @@ public class UserServiceImpl implements UserService {
         }
         return existingUser;
     }
+
+    @Override
+    public List<User> findAllCoordinadores() {
+        return userRepository.findByRole(Role.COORDINADOR);
+    }
+
+    @Override
+    public List<User> findAsesoresSinCoordinador() {
+        return userRepository.findByRoleAndCoordinadorIsNull(Role.ASESOR);
+    }
 }

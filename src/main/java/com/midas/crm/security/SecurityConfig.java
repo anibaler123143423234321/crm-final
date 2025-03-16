@@ -58,37 +58,65 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll() // Permite acceso a /error
+
+                        // Endpoints de autenticación
                         .requestMatchers(
                                 "/api/authentication/sign-in",
                                 "/api/authentication/sign-up",
-                                "/api/cliente-promocion",
+                                "/api/authentication/refresh-token"
+                        ).permitAll()
+
+                        // Endpoints de gestión de usuarios
+                        .requestMatchers(
+                                "/api/user/registrar",
                                 "/api/user/crear-masivo",
                                 "/api/user/crear-masivo-backoffice",
                                 "/api/user/listar",
                                 "/api/user/change/**",
                                 "/api/user",
-                                "/api/sms/send",
                                 "/api/user/**",
                                 "/api/user/buscar",
                                 "/api/user/soft/**",
+                                "/api/generateUsername"
+                        ).permitAll()
+
+                        // Endpoints de gestión de coordinadores y asesores
+                        .requestMatchers(
+                                "/api/user/coordinadores",
+                                "/api/user/asesores-sin-coordinador",
+                                "/api/user/asignar-coordinador/**",
+                                "/api/user/remover-coordinador/**",
+                                "/api/coordinadores",
+                                "/api/coordinadores/**",
+                                "/api/coordinadores/asignar-asesores",
+                                "/api/coordinadores/asignar-masivo",
+                                "/api/coordinadores/asesores-disponibles"
+                        ).permitAll()
+
+                        // Endpoints de clientes
+                        .requestMatchers(
+                                "/api/cliente-promocion",
+                                "/api/cliente-promocion/movil/{movil}",
+                                "/api/cliente-promocion/",
                                 "/api/clientes/con-usuario",
                                 "/api/clientes/con-usuario-filtrados",
                                 "/api/clientes/con-usuario-filtrados-fecha",
                                 "/api/clientes/exportar-excel-individual/{movil}",
                                 "/api/clientes/exportar-excel-masivo",
                                 "/api/clientes/exportar-excel-por-fecha",
-                                "/api/cliente-promocion/movil/{movil}",
-                                "/api/cliente-promocion/",
                                 "/api/clientes/exportar-excel-individual/{movil}",
-                                "/api/clientes/{id}",
-                                "/api/generateUsername",
+                                "/api/clientes/{id}"
+                        ).permitAll()
+
+                        // Endpoints de mensajería
+                        .requestMatchers(
+                                "/api/sms/send",
                                 "/api/registerMessagingToken",
                                 "/api/fcm/send",
                                 "/api/numbers/{number}",
-                                "/api/bulk",
-                                "/api/authentication/refresh-token"
-
+                                "/api/bulk"
                         ).permitAll()
+
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -109,10 +137,11 @@ public class SecurityConfig {
                     "https://project-a16f1.web.app",
                     "https://www.leads.midassolutiongroup.com",
                     "http://localhost:4321",
-                    "https://consultanumero.midassolutiongroup.com"
-                    ));
+                    "https://consultanumero.midassolutiongroup.com",
+                    "https://leads.midassolutiongroup.com"
+            ));
             config.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
             config.setExposedHeaders(List.of("Authorization"));
             config.setAllowCredentials(true);
             return config;
@@ -141,10 +170,11 @@ public class SecurityConfig {
                                 "https://project-a16f1.web.app",
                                 "https://www.leads.midassolutiongroup.com",
                                 "http://localhost:4321",
-                                "https://consultanumero.midassolutiongroup.com"
+                                "https://consultanumero.midassolutiongroup.com",
+                                "https://leads.midassolutiongroup.com"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("Authorization", "Content-Type")
+                        .allowedHeaders("Authorization", "Content-Type", "Accept")
                         .allowCredentials(true);
             }
         };

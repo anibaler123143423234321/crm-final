@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "9039:9039"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://54.164.43.201:3306/midascrm_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=Midas*2025$
