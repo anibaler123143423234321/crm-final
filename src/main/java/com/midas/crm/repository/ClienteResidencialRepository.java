@@ -61,4 +61,27 @@ public interface ClienteResidencialRepository extends JpaRepository<ClienteResid
 
     List<ClienteResidencial> findByFechaCreacionBetween(LocalDateTime start, LocalDateTime end);
 
+    /**
+     * Encuentra todos los clientes residenciales asociados a un usuario (asesor) específico
+     * @param usuarioId ID del usuario (asesor)
+     * @return Lista de clientes residenciales
+     */
+    List<ClienteResidencial> findByUsuarioId(Long usuarioId);
+
+    /**
+     * Cuenta el número de clientes residenciales asociados a un usuario (asesor) específico
+     * @param usuarioId ID del usuario (asesor)
+     * @return Número de clientes
+     */
+    @Query("SELECT COUNT(c) FROM ClienteResidencial c WHERE c.usuario.id = :usuarioId")
+    Long countClientesByUsuarioId(@Param("usuarioId") Long usuarioId);
+
+    /**
+     * Encuentra todos los clientes residenciales con venta realizada asociados a un usuario (asesor)
+     * @param usuarioId ID del usuario (asesor)
+     * @return Lista de clientes con venta realizada
+     */
+    @Query("SELECT c FROM ClienteResidencial c WHERE c.usuario.id = :usuarioId AND c.ventaRealizada = true")
+    List<ClienteResidencial> findVentasRealizadasByUsuarioId(@Param("usuarioId") Long usuarioId);
+
 }

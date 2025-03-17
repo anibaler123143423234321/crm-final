@@ -40,6 +40,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRole(Role role);
 
+
+    Optional<User> findByIdAndRole(Long id, Role role);
+
+    List<User> findByCoordinadorIdAndRole(Long coordinadorId, Role role);
+
     @Query("SELECT u FROM User u WHERE u.role = :role AND u.coordinador IS NULL")
     List<User> findByRoleAndCoordinadorIsNull(@Param("role") Role role);
 

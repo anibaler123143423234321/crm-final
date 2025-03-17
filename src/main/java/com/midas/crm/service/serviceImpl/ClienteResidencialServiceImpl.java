@@ -2,6 +2,7 @@ package com.midas.crm.service.serviceImpl;
 
 import com.midas.crm.entity.ClienteConUsuarioDTO;
 import com.midas.crm.entity.ClienteResidencial;
+import com.midas.crm.entity.DTO.ClienteResidencialDTO;
 import com.midas.crm.entity.User;
 import com.midas.crm.repository.ClienteResidencialRepository;
 import com.midas.crm.repository.UserRepository;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -112,5 +114,54 @@ public class ClienteResidencialServiceImpl implements ClienteResidencialService 
     @Override
     public Page<ClienteConUsuarioDTO> obtenerClientesConUsuarioFiltradosPorFechaActual(String dniAsesor, String nombreAsesor, String numeroMovil, Pageable pageable) {
         return clienteRepo.obtenerClientesConUsuarioFiltradosPorFechaActual(dniAsesor, nombreAsesor, numeroMovil, pageable);
+    }
+
+
+
+    @Override
+    public List<ClienteResidencialDTO> getClientesByAsesorId(Long asesorId) {
+        List<ClienteResidencial> clientes = clienteRepo.findByUsuarioId(asesorId);
+        return clientes.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Long countClientesByAsesorId(Long asesorId) {
+        return clienteRepo.countClientesByUsuarioId(asesorId);
+    }
+
+
+    @Override
+    public List<ClienteResidencialDTO> getVentasRealizadasByAsesorId(Long asesorId) {
+        List<ClienteResidencial> ventas = clienteRepo.findVentasRealizadasByUsuarioId(asesorId);
+        return ventas.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public ClienteResidencialDTO convertToDTO(ClienteResidencial cliente) {
+        ClienteResidencialDTO dto = new ClienteResidencialDTO();
+        dto.setId(cliente.getId());
+        dto.setCampania(cliente.getCampania());
+        dto.setNombresApellidos(cliente.getNombresApellidos());
+        dto.setNifNie(cliente.getNifNie());
+        dto.setNacionalidad(cliente.getNacionalidad());
+        dto.setFechaNacimiento(cliente.getFechaNacimiento());
+        dto.setGenero(cliente.getGenero());
+        dto.setCorreoElectronico(cliente.getCorreoElectronico());
+        dto.setMovilContacto(cliente.getMovilContacto());
+        dto.setDireccion(cliente.getDireccion());
+        dto.setCodigoPostal(cliente.getCodigoPostal());
+        dto.setProvincia(cliente.getProvincia());
+        dto.setCiudad(cliente.getCiudad());
+        dto.setTipoPlan(cliente.getTipoPlan());
+        dto.setVentaRealizada(cliente.getVentaRealizada());
+        dto.setFechaCreacion(cliente.getFechaCreacion());
+        dto.setMovilesAPortar(cliente.getMovilesAPortar());
+        return dto;
     }
 }

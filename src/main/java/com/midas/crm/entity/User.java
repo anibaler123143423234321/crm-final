@@ -1,5 +1,7 @@
 package com.midas.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -68,8 +70,10 @@ public class User {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coordinador_id")
+    @JsonBackReference  // Evita la serialización inversa para evitar ciclo
     private User coordinador;
 
     @OneToMany(mappedBy = "coordinador", fetch = FetchType.LAZY)
+    @JsonManagedReference  // Serializa esta colección sin volver a serializar el coordinador
     private List<User> asesores;
 }

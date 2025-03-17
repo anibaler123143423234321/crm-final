@@ -3,6 +3,7 @@ package com.midas.crm.service;
 
 import com.midas.crm.entity.ClienteConUsuarioDTO;
 import com.midas.crm.entity.ClienteResidencial;
+import com.midas.crm.entity.DTO.ClienteResidencialDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,4 +38,11 @@ public interface ClienteResidencialService {
 
     Page<ClienteConUsuarioDTO> obtenerClientesConUsuarioFiltradosPorFechaActual(String dniAsesor, String nombreAsesor, String numeroMovil, Pageable pageable);
 
+    List<ClienteResidencialDTO> getClientesByAsesorId(Long asesorId);
+
+    Long countClientesByAsesorId(Long asesorId);
+
+    List<ClienteResidencialDTO> getVentasRealizadasByAsesorId(Long asesorId);
+
+    ClienteResidencialDTO convertToDTO(ClienteResidencial cliente);
 }
